@@ -1,0 +1,2 @@
+u«Zµìmş™ZŠvÚ±î¸netstat -ano | findstr :8080
+taskkill /PID num /F
