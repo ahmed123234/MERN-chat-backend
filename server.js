@@ -25,7 +25,7 @@ app.use(cookieParser())
 
 app.use(cors({
     credentials: true,
-    origin: '*', //host name of the client URL,
+    origin: process.env.CLIENT_URL, //host name of the client URL,
 
 }));
 
