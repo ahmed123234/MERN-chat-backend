@@ -9,7 +9,7 @@ const getUserDataFromRequest = (req) => {
        const userData = jwt.verify(token, process.env.JWT_SECRET);
        return userData;
     }
-    return;
+
 }
 
 // get the messages between the current user and the selected user(the reciver of the message)
