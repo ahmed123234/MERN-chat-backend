@@ -36,7 +36,7 @@ app.use('/messages', messagesRouter)
 app.use('/groups', groupRouter)
 
 
-const PORT = process.env.PORT || 4001;
+const PORT = process.env.PORT;
 // connectDB();
 
 const server = app.listen(PORT, () => {
