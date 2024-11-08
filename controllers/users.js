@@ -2,18 +2,9 @@ const { UserModel } = require('../models/users');
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const fs = require('fs');
-const { token } = require('morgan');
-
-
 
 const generateToken = (user) => {
-    // jwt.sign({ userId: user._id }, process.env.JWT_SECRET, (err, token) => {
-    //     if (err) {
-    //         throw Error(err.message)
-    //     }
-    //     console.log("token is genreted for user %s", user.username);
-    // })
-
+ 
     const token = jwt.sign(
         { 
             userId: user._id,
@@ -27,11 +18,6 @@ const generateToken = (user) => {
 
     console.log("decoded token is", jwt.verify(token, process.env.JWT_SECRET));
     return token;
-
-
-
-    // console.log("token is", token);
-    // return token;
 }
 
 const verifyToken = (req) => {
@@ -71,11 +57,6 @@ const login = async (username, password) => {
     
         if (auth) {
             console.log("true and user is handeled", auth);
-            // const isActive = await UserModel.findByIdAndUpdate(user._id, {activeStatus: true}).select('activeStatus');
-            
-            // const updatedUser = await UserModel.findById(user._id);
-            // console.log("is active is", updatedUser.activeStatus);
-
             return user;
         } 
         throw new Error ('incorrect password');
@@ -131,8 +112,7 @@ module.exports.register_post = async (req, res) => {
             password, 
         });
 
-
-        const data = await user.save();
+        await user.save();
         const token = generateToken(user); 
 
         console.log("token is genreted for user %s", user.username, token);
@@ -153,15 +133,6 @@ module.exports.register_post = async (req, res) => {
 
              });
 
-        // jwt.sign({ userId: user._id, username, activeStatus: user.activeStatus }, process.env.JWT_SECRET, (err, token) => {
-        //     if (err) {
-        //         throw Error(err.message)
-        //     }
-            
-
-        // })
-
-
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ error: err.message });
@@ -171,7 +142,6 @@ module.exports.register_post = async (req, res) => {
 
 module.exports.get_profile = (req, res) => {
 
-
     const message = verifyToken(req);
     console.log("message of the token is ", message);
 
@@ -180,65 +150,37 @@ module.exports.get_profile = (req, res) => {
     } else {
         res.status(401).json(message)
     }
-
-    // const { token } = req.cookies;
-
-    // // console.log("cookie is", token);
-
-    // if (token) {
-    //     jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
-    //         if (err) {
-    //             throw Error(err.message);
-    //         }
-    //         // console.log("the token is available", decodedToken);
-
-    //         // const { id, username } = decodedToken;
-    //         res.status(200).json(decodedToken)
-
-    //     });
-    // } else {
-    //     res.status(401).json({ error: "Please login or signup to access the resource" })
-    // }
 }
 
 module.exports.getAllUsers = async (req, res) => {
-    try {
-        const users = await UserModel.find(/**{}, {_id: 1, username: 1, profilePicture} **/
-            /**make projection or using slect method */).select(["username","profilePicture"]).exec();
+    const message = verifyToken(req);
+    if ('userId' in message) {
+        try {
+            const users = await UserModel.find().select(["username","profilePicture"]).exec();
 
-        console.log({users});
-        res.json(users);
+            console.log({users});
+            res.json(users);
 
-    } catch(err) {
-        console.log("inside get all users", err.message);
+        } catch(err) {
+            console.log("inside get all users", err.message);
 
-        res.status(500).json({ error: err.message });
-    
+            res.status(500).json({ error: err.message });
+        
+        }
+    } else {
+        res.status(401).json(message)
     }
 }
 
-module.exports.logout = async (req, res) => {
+module.exports.logout = async (_, res) => {
 
     res.cookie("token", '', {
         httpOnly: true,
-        sameSite: 'none', //the browser can send the cookie between two different hodtnames
+        sameSite: 'none', //the browser can send the cookie between two different hostnames
         secure: true,
         maxAge: 10
 
     }).json({message: "logout successfully"});
-
-    // const message = verifyToken(req);
-
-    // if ('userId' in message) {
-        // const {userId: _id, username} = message;
-        // const isActive = await UserModel.findByIdAndUpdate(_id, {activeStatus: false}).select('activeStatus');
-        // console.log("is active is", isActive);
-
-        
-
-    // } else {
-    //     res.status(401).json(message)
-    // }
 }
 
 module.exports.updateProfileImage = async (req, res) => {
@@ -246,10 +188,6 @@ module.exports.updateProfileImage = async (req, res) => {
     console.log("image is", image);
     const message = verifyToken(req);
     console.log("cookie is", message);
-    // const {userId} = req.query;
-
-    // console.log("userId", userId);
-
 
     if ('userId' in message ) {
     try {
@@ -378,9 +316,6 @@ module.exports.appendNewGroup = async (req, res) => {
 
         const groups = docs.groups;
 
-        // if(groups.length === 0) {
-
-        // }
         groups.push(group);
         const data = await UserModel.findByIdAndUpdate(userId, {
             groups
@@ -392,30 +327,3 @@ module.exports.appendNewGroup = async (req, res) => {
         console.error(err.message);
     }
 }
-
-
-
-
-// module.exports.updateActiveNowVisibility = async (req, res) => {
-//     const message = verifyToken(req);
-//     const activeNowVisible = req.query.activeNowVisible;
-
-//     if ('userId' in message) {
-//         const {userId, username, activeStatus} = message;
-//         await UserModel.findByIdAndUpdate(userId, {activeNowVisible});
-       
-//         res.json({message: "status updated successfully"});
-
-//         const token = jwt.sign({ userId, username, activeStatus: !activeStatus }, process.env.JWT_SECRET)
-
-//         res.cookie("token",token, {
-//             httpOnly: true,
-//             sameSite: 'none', //the browser can send the cookie between two different hodtnames
-//             secure: true,
-    
-//         }).json({message: "logout successfully"});
-
-//     } else {
-//         res.status(401).json(message)
-//     }
-// }

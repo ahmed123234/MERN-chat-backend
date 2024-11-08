@@ -5,7 +5,6 @@ const {
     login_post, 
     getAllUsers, 
     logout, 
-    updateActiveNowVisibility, 
     updateActiveStatus,
     updateProfileImage,
     appendNewGroup

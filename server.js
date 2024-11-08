@@ -37,16 +37,11 @@ app.use('/groups', groupRouter)
 
 
 const PORT = process.env.PORT;
-// connectDB();
 
 const server = app.listen(PORT, () => {
 
+    connectDB();
     console.log("server is running and listening on port %s", server.address().port);
-})
-
-mongoose.connect(process.env.DB_URI);
-mongoose.connection.once('open', () => {
-    console.log("connsction stablished successfully on port %s", mongoose.connection.port);
 })
 
 
